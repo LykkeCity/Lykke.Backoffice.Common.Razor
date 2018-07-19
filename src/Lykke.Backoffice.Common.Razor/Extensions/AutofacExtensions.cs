@@ -15,7 +15,7 @@ namespace Lykke.Backoffice.Common.Razor.Extensions
 {
     public static class AutofacExtensions
     {
-        [Obsolete("Use RegisterAuditLogsService with ILogFactory as a parameter")]
+        [Obsolete("Use RegisterAuditLogsService without ILog parameter (it uses ILogFactory)")]
         public static void RegisterAuditLogsService(this ContainerBuilder builder, IReloadingManager<string> connStringManager, 
             string logsTableName, string logTypeTableName, ILog log)
         {
@@ -46,26 +46,25 @@ namespace Lykke.Backoffice.Common.Razor.Extensions
         }
         
         public static void RegisterAuditLogsService(this ContainerBuilder builder, IReloadingManager<string> connStringManager, 
-            string logsTableName, string logTypeTableName, ILogFactory logFactory)
+            string logsTableName, string logTypeTableName)
         {
             if (builder == null) throw new ArgumentNullException(nameof(builder));
-            if (logFactory == null) throw new ArgumentNullException(nameof(logFactory));
             if (connStringManager == null) throw new ArgumentNullException(nameof(connStringManager));
             
             if (string.IsNullOrWhiteSpace(logsTableName))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(logsTableName));
 
-            builder.RegisterInstance(
+            builder.Register(ctx => 
                     new AuditLogsRepository(
                         AzureTableStorage<AuditLogEntity>.Create(connStringManager,
-                            logsTableName, logFactory),
-                        AzureTableStorage<AzureIndex>.Create(connStringManager, logsTableName, logFactory))
+                            logsTableName, ctx.Resolve<ILogFactory>()),
+                        AzureTableStorage<AzureIndex>.Create(connStringManager, logsTableName, ctx.Resolve<ILogFactory>()))
                 ).As<IAuditLogsRepository>()
                 .SingleInstance();
             
-            builder.RegisterInstance(
+            builder.Register(ctx =>
                     new AuditLogTypesRepository(
-                        AzureTableStorage<AuditLogTypeEntity>.Create(connStringManager, logTypeTableName, logFactory))
+                        AzureTableStorage<AuditLogTypeEntity>.Create(connStringManager, logTypeTableName, ctx.Resolve<ILogFactory>()))
                 ).As<IAuditLogTypesRepository>()
                 .SingleInstance();
             
