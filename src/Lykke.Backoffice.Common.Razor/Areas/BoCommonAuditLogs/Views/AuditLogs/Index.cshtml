@@ -1,0 +1,36 @@
+@using Lykke.Backoffice.Common.Razor.Areas.BoCommonAuditLogs.Models
+@model AuditLogsQueryModel
+
+<div>
+    <h3>Audit logs</h3>
+    <form id="query-form" class="form-inline">
+        <div class="form-group">
+            <label for="type">Type</label>
+            @Html.DropDownListFor(m => m.Type, Model.Types)
+        </div>
+        <div class="form-group">
+            <label for="author">Author</label>
+            @Html.TextBoxFor(m => m.Author, new {@class = "form-control"})
+        </div>
+        <div class="form-group">
+            <label for="startDate">Start date</label>
+            @Html.TextBoxFor(m => m.StartDate, new {@class = "form-control", type = "date", placeholder = "yyyy-MM-dd"})
+        </div>
+        <div class="form-group">
+            <label for="endDate">End date</label>
+            @Html.TextBoxFor(m => m.EndDate, new {@class = "form-control", type = "date", placeholder = "yyyy-MM-dd"})
+        </div>
+        <button type="button" class="btn btn-primary" onclick="search()" disabled="@(Model.Types.Any() ? null : "disabled")">
+            <i class="glyphicon glyphicon-search"></i> Search
+        </button>
+    </form>
+</div>
+<div id="audit-log">
+    @Html.Partial("_AuditLogsList", Model.AuditLogs)
+</div>
+
+<script>
+    function search() {
+        Requests.doRequest({url: '@Url.Action("Query")', formId: '#query-form', divResult: '#audit-log', showLoading : true});
+    }
+</script>

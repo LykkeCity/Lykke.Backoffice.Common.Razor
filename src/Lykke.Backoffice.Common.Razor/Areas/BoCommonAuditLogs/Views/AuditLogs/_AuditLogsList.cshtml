@@ -1,0 +1,37 @@
+@using Lykke.Backoffice.Common.Razor.Domain.AuditLog
+@model IEnumerable<IAuditLog>
+
+<table class="table table-condensed">
+    <thead>
+    <tr>
+        <th style="min-width: 145px;">Date</th>
+        <th>Type</th>
+        <th>Author</th>
+        <th>Entity Id</th>
+        <th>Entity Name</th>
+        <th>Changes</th>
+    </tr>
+    </thead>
+    <tbody>
+    @if (!Model.Any())
+    {
+        <tr>
+            <td colspan="5" class="text-center">No audit logs here yet</td>
+        </tr>
+    }
+    else
+    {
+        foreach (var log in Model)
+        {
+            <tr>
+                <td>@log.CreateDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                <td>@log.Type</td>
+                <td>@log.Author</td>
+                <td>@log.EntityId</td>
+                <td>@(log.EntityName ?? "-")</td>
+                <td>@log.Change</td>
+            </tr>
+        }
+    }
+    </tbody>
+</table>
